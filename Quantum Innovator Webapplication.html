@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Random Number Generator - IBM Qiskit</title>
+    <title>Quantum Random Number Generator</title>
     <style>
         :root {
             --color-background: #fcfcf9;
@@ -353,7 +353,7 @@
     <div class="container">
         <header>
             <h1>⚛️ Quantum Random Number Generator</h1>
-            <p class="subtitle">Harnessing quantum superposition for true randomness using IBM Qiskit</p>
+            <p class="subtitle">Created by Carin Samer, Faculty of Engineering - Alexandria University </p>
             <span class="quantum-badge">🔬 Quantum Computing</span>
         </header>
 
@@ -422,53 +422,9 @@ Click "Generate Random Number" to see the circuit!
             </div>
         </div>
 
-        <div class="info-section">
-            <h3>🔬 How It Works</h3>
-            <p>
-                This Quantum Random Number Generator uses the principles of quantum superposition. 
-                Each qubit is initialized in the |0⟩ state, then a Hadamard gate (H) is applied to create 
-                an equal superposition of |0⟩ and |1⟩ states. When measured, the quantum state collapses 
-                randomly to one of the possible outcomes, providing true randomness based on quantum mechanics 
-                rather than classical algorithms.
-            </p>
-        </div>
-
-        <div class="code-section">
-            <h3>💻 Python Implementation (Qiskit)</h3>
-            <pre><code>from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
-from qiskit_aer import AerSimulator
-
-class QRNG:
-    def __init__(self, num_qubits):
-        self.num_qubits = num_qubits
         
-    def create_circuit(self):
-        qr = QuantumRegister(self.num_qubits, 'q')
-        cr = ClassicalRegister(self.num_qubits, 'c')
-        circuit = QuantumCircuit(qr, cr)
-        
-        # Apply Hadamard gates for superposition
-        for qubit in range(self.num_qubits):
-            circuit.h(qubit)
-        
-        # Measure all qubits
-        circuit.measure(qr, cr)
-        return circuit
-    
-    def run_qrng(self, shots=1):
-        circuit = self.create_circuit()
-        simulator = AerSimulator()
-        job = simulator.run(circuit, shots=shots)
-        result = job.result()
-        counts = result.get_counts(circuit)
-        return counts
 
-# Usage
-qrng = QRNG(num_qubits=3)
-result = qrng.run_qrng(shots=100)</code></pre>
-        </div>
-    </div>
-
+       
     <script>
         // Global state
         let distributionData = {};
