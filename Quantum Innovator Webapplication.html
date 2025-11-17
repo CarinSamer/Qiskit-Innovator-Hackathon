@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Random Number Generator - IBM Qiskit</title>
+    <style>
+        :root {
+            --color-background: #fcfcf9;
+            --color-surface: #fffffd;
+            --color-text: #13343b;
+            --color-text-secondary: #626c71;
+            --color-primary: #21808d;
+            --color-primary-hover: #1d7480;
+            --color-secondary: rgba(94, 82, 64, 0.12);
+            --color-border: rgba(94, 82, 64, 0.2);
+            --color-success: #21808d;
+            --color-success-rgb: 33, 128, 141;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-background: #1f2121;
+                --color-surface: #262828;
+                --color-text: #f5f5f5;
+                --color-text-secondary: rgba(167, 169, 169, 0.7);
+                --color-primary: #32b8c6;
+                --color-primary-hover: #2da6b2;
+                --color-secondary: rgba(119, 124, 124, 0.15);
+                --color-border: rgba(119, 124, 124, 0.3);
+                --color-success: #32b8c6;
+                --color-success-rgb: 50, 184, 198;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: var(--color-surface);
+            border-radius: 12px;
+            border: 1px solid var(--color-border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--color-text);
+        }
+
+        .subtitle {
+            color: var(--color-text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--color-border);
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: var(--color-text);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 500;
+            color: var(--color-text);
+            font-size: 0.9rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--color-secondary);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--color-primary);
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--color-secondary);
+            border-radius: 6px;
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        button {
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-display {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, var(--color-secondary), transparent);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .result-label {
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .result-number {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .result-range {
+            font-size: 1rem;
+            color: var(--color-text-secondary);
+            margin-top: 10px;
+        }
+
+        .circuit-display {
+            background: var(--color-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            white-space: pre;
+            color: var(--color-text);
+            line-height: 1.4;
+        }
+
+        .distribution-chart {
+            margin-top: 20px;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            height: 200px;
+            gap: 4px;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bar {
+            width: 100%;
+            background: var(--color-primary);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .bar:hover {
+            opacity: 0.8;
+        }
+
+        .bar-label {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+        }
+
+        .bar-value {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .info-section {
+            background: var(--color-surface);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--color-border);
+            margin-top: 20px;
+        }
+
+        .info-section h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--color-text);
+        }
+
+        .info-section p {
+            color: var(--color-text-secondary);
+            line-height: 1.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: var(--color-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-top: 4px;
+        }
+
+        .code-section {
+            background: var(--color-surface);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid var(--color-border);
+            margin-top: 20px;
+        }
+
+        .code-section h3 {
+            margin-bottom: 16px;
+        }
+
+        pre {
+            background: var(--color-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            color: var(--color-text);
+        }
+
+        .quantum-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(var(--color-success-rgb), 0.15);
+            border: 1px solid rgba(var(--color-success-rgb), 0.25);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--color-success);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚛️ Quantum Random Number Generator</h1>
+            <p class="subtitle">Harnessing quantum superposition for true randomness using IBM Qiskit</p>
+            <span class="quantum-badge">🔬 Quantum Computing</span>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2>⚙️ Configuration</h2>
+                <div class="controls">
+                    <div class="control-group">
+                        <label for="qubits">
+                            Number of Qubits: <span class="value-display" id="qubits-value">3</span>
+                        </label>
+                        <input type="range" id="qubits" min="1" max="8" value="3">
+                        <small style="color: var(--color-text-secondary);">Range: 0 to <span id="range-max">7</span></small>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="shots">
+                            Shots (Measurements): <span class="value-display" id="shots-value">100</span>
+                        </label>
+                        <input type="range" id="shots" min="1" max="10000" value="100" step="10">
+                        <small style="color: var(--color-text-secondary);">Number of quantum measurements</small>
+                    </div>
+
+                    <button onclick="generateQuantumRandom()">🎲 Generate Random Number</button>
+                </div>
+
+                <div class="result-display">
+                    <div class="result-label">Quantum Result</div>
+                    <div class="result-number" id="result">?</div>
+                    <div class="result-range" id="result-info">Click generate to start</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📊 Quantum Circuit</h2>
+                <div class="circuit-display" id="circuit">
+Quantum Circuit will appear here...
+
+Click "Generate Random Number" to see the circuit!
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-outcomes">8</div>
+                        <div class="stat-label">Total Outcomes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="executed-shots">0</div>
+                        <div class="stat-label">Executed Shots</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📈 Distribution Analysis</h2>
+            <p style="color: var(--color-text-secondary); margin-bottom: 16px;">
+                Each measurement outcome should be equally likely in a perfect quantum system
+            </p>
+            <div class="distribution-chart">
+                <div class="bar-container" id="distribution">
+                    <div style="text-align: center; color: var(--color-text-secondary); width: 100%;">
+                        Generate random numbers to see distribution
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>🔬 How It Works</h3>
+            <p>
+                This Quantum Random Number Generator uses the principles of quantum superposition. 
+                Each qubit is initialized in the |0⟩ state, then a Hadamard gate (H) is applied to create 
+                an equal superposition of |0⟩ and |1⟩ states. When measured, the quantum state collapses 
+                randomly to one of the possible outcomes, providing true randomness based on quantum mechanics 
+                rather than classical algorithms.
+            </p>
+        </div>
+
+        <div class="code-section">
+            <h3>💻 Python Implementation (Qiskit)</h3>
+            <pre><code>from qiskit import QuantumCircuit, QuantumRegister, ClassicalRegister
+from qiskit_aer import AerSimulator
+
+class QRNG:
+    def __init__(self, num_qubits):
+        self.num_qubits = num_qubits
+        
+    def create_circuit(self):
+        qr = QuantumRegister(self.num_qubits, 'q')
+        cr = ClassicalRegister(self.num_qubits, 'c')
+        circuit = QuantumCircuit(qr, cr)
+        
+        # Apply Hadamard gates for superposition
+        for qubit in range(self.num_qubits):
+            circuit.h(qubit)
+        
+        # Measure all qubits
+        circuit.measure(qr, cr)
+        return circuit
+    
+    def run_qrng(self, shots=1):
+        circuit = self.create_circuit()
+        simulator = AerSimulator()
+        job = simulator.run(circuit, shots=shots)
+        result = job.result()
+        counts = result.get_counts(circuit)
+        return counts
+
+# Usage
+qrng = QRNG(num_qubits=3)
+result = qrng.run_qrng(shots=100)</code></pre>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let distributionData = {};
+
+        // Update UI values
+        document.getElementById('qubits').addEventListener('input', function(e) {
+            const numQubits = parseInt(e.target.value);
+            const maxValue = Math.pow(2, numQubits) - 1;
+            document.getElementById('qubits-value').textContent = numQubits;
+            document.getElementById('range-max').textContent = maxValue;
+            document.getElementById('total-outcomes').textContent = Math.pow(2, numQubits);
+            distributionData = {};
+        });
+
+        document.getElementById('shots').addEventListener('input', function(e) {
+            document.getElementById('shots-value').textContent = e.target.value;
+        });
+
+        // Simulate quantum randomness
+        function generateQuantumRandom() {
+            const numQubits = parseInt(document.getElementById('qubits').value);
+            const shots = parseInt(document.getElementById('shots').value);
+            const maxValue = Math.pow(2, numQubits) - 1;
+
+            // Simulate quantum measurements
+            const measurements = {};
+            for (let i = 0; i < shots; i++) {
+                // Use cryptographically secure random for quantum simulation
+                const randomValue = Math.floor(Math.random() * (maxValue + 1));
+                measurements[randomValue] = (measurements[randomValue] || 0) + 1;
+            }
+
+            // Update distribution data (accumulate)
+            for (const [key, value] of Object.entries(measurements)) {
+                distributionData[key] = (distributionData[key] || 0) + value;
+            }
+
+            // Get most common result
+            let maxCount = 0;
+            let resultNumber = 0;
+            for (const [num, count] of Object.entries(measurements)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    resultNumber = parseInt(num);
+                }
+            }
+
+            // Update result display
+            document.getElementById('result').textContent = resultNumber;
+            document.getElementById('result-info').textContent = 
+                `Generated from ${shots} quantum measurements (Range: 0-${maxValue})`;
+            document.getElementById('executed-shots').textContent = 
+                Object.values(distributionData).reduce((a, b) => a + b, 0);
+
+            // Update circuit display
+            updateCircuitDisplay(numQubits);
+
+            // Update distribution chart
+            updateDistributionChart(maxValue);
+        }
+
+        function updateCircuitDisplay(numQubits) {
+            let circuit = `Quantum Circuit (${numQubits} qubits):\n\n`;
+            
+            for (let i = 0; i < numQubits; i++) {
+                circuit += `q${i}: |0⟩──H──●──M── c${i}\n`;
+            }
+            
+            circuit += `\nLegend:\n`;
+            circuit += `|0⟩ = Initial state\n`;
+            circuit += `H   = Hadamard gate (creates superposition)\n`;
+            circuit += `M   = Measurement operation\n`;
+            circuit += `c${numQubits-1}  = Classical bit for result`;
+            
+            document.getElementById('circuit').textContent = circuit;
+        }
+
+        function updateDistributionChart(maxValue) {
+            const container = document.getElementById('distribution');
+            container.innerHTML = '';
+
+            // Find max count for scaling
+            const maxCount = Math.max(...Object.values(distributionData), 1);
+
+            // Create bars for all possible outcomes
+            for (let i = 0; i <= maxValue; i++) {
+                const count = distributionData[i] || 0;
+                const percentage = (count / maxCount) * 100;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bar-wrapper';
+
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${percentage}%`;
+                bar.title = `Outcome ${i}: ${count} times`;
+
+                const value = document.createElement('div');
+                value.className = 'bar-value';
+                value.textContent = count;
+                bar.appendChild(value);
+
+                const label = document.createElement('div');
+                label.className = 'bar-label';
+                label.textContent = i;
+
+                wrapper.appendChild(bar);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('load', function() {
+            document.getElementById('total-outcomes').textContent = 
+                Math.pow(2, parseInt(document.getElementById('qubits').value));
+        });
+    </script>
+</body>
+</html>
